@@ -66,7 +66,7 @@ export default function LandingBanner({ onSend }: LandingBannerProps) {
                     input.value = '';
                   }
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-500 hover:bg-emerald-600 text-black rounded-md transition-colors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-500 hover:bg-emerald-600 text-slate-200 rounded-md transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
               </button>

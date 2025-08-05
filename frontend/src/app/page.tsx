@@ -9,9 +9,15 @@ import LandingBanner from '@/components/LandingBanner';
 import { getSessionId } from '@/lib/session';
 import axios from 'axios';
 
+interface Source {
+  index: number;
+  source: string;
+}
+
 interface Message {
   sender: 'user' | 'agent';
   text: string;
+  sources?: Source[];
 }
 
 export default function Home() {
@@ -35,7 +41,8 @@ export default function Home() {
       });
 
       const reply = res.data?.reply || 'Error: No reply received';
-      setMessages((prev) => [...prev, { sender: 'agent', text: reply }]);
+      const sources = res.data?.sources;
+      setMessages((prev) => [...prev, { sender: 'agent', text: reply, sources }]);
     } catch (error) {
       console.error(error);
       setMessages((prev) => [
@@ -57,7 +64,12 @@ export default function Home() {
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 min-h-[calc(100vh-8rem)] flex flex-col">
               <div className="flex-1 overflow-y-auto p-6">
                 {messages.map((msg, i) => (
-                  <ChatMessage key={i} sender={msg.sender} text={msg.text} />
+                  <ChatMessage 
+                    key={i} 
+                    sender={msg.sender} 
+                    text={msg.text}
+                    sources={msg.sources}
+                  />
                 ))}
               </div>
               <ChatInput onSend={handleSend} />
