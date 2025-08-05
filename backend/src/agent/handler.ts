@@ -1,19 +1,23 @@
 import { Request, Response } from "express";
-import { callLLM } from "./llm";
+import { callLLM }from "./llm";
 import { storeMessage, getSessionHistory } from "../memory/store";
+import { getEmbedding } from "../rag/embed";
+import { queryRelevantChunks } from "../rag/vectorStore";
 
 export async function handleMessage(req: Request, res: Response) {
   const { key, message, session_id } = req.body;
-  if (!message || !session_id) {
-    return res.status(400).json({ error: "Missing message or session_id" });
+  if (!message || !session_id || !key) {
+    return res.status(400).json({ error: "Missing message, session_id or key" });
   }
 
   storeMessage(session_id, { role: "user", content: message });
 
-  // Get recent history (last 6 messages for better context)
-  const history = getSessionHistory(session_id).slice(-6);
+  const history = getSessionHistory(session_id).slice(-2); // last 2 messages
 
-  const reply = await callLLM(key, history);
+  const queryEmbedding = await getEmbedding(message);
+  const contextChunks = queryRelevantChunks(queryEmbedding, 3);
+
+  const reply = await callLLM(key, [...history, { role: "user", content: message }], contextChunks);
 
   storeMessage(session_id, { role: "assistant", content: reply });
 
