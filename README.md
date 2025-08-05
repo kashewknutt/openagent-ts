@@ -38,7 +38,7 @@ npm run dev
 
 Hosted on Google Cloud Run  
 Live URL:  
-`https://openagent-ts-backend-<your-region>.a.run.app/agent/message`
+`https://openagent-ts-backend-365628037012.asia-south1.run.app/agent/message`
 
 ### Test via cURL
 
