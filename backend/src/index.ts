@@ -8,7 +8,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: "./.env" });
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT =  8080;
 
 app.use(express.json());
 
@@ -22,6 +22,6 @@ function onStartup() {
 
 onStartup(); // Call the function on startup
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server listening at http://0.0.0.0:${PORT}`);
 });
