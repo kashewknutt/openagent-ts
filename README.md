@@ -1,144 +1,90 @@
-# OpenAgent-TS — Pluggable AI Agent with RAG, Memory & Plugin System
+# OpenAgent-TS
 
-This is a full-stack open-source AI Agent built with **TypeScript**, powered by **Groq**, featuring contextual memory, retrieval-augmented generation (RAG), and a simple plugin system. Built as part of a 1-day backend internship challenge.
+This is an AI Agent backend system built in **TypeScript (Node.js)**, featuring:
+
+- Chat interface with memory
+- Retrieval-Augmented Generation (RAG)
+- Plugin system (Math + Weather)
+- Hosted on Google Cloud Run
 
 ---
 
 ## Features
 
-- **API Endpoint:** `/agent/message` — LLM agent with memory and plugin support
-- **Session-based Memory:** Remembers prior messages per session
-- **RAG (Retrieval-Augmented Generation):** Uses embedded context from markdown/text files
-- **Plugin System:**
-    - `WeatherPlugin(query)`
-    - `MathPlugin(expression)`
-- **Custom Prompting:** Includes system instructions, memory, context, and plugin results
-- **OpenRouter + Any LLM Backend** (GPT-4, Claude, Mixtral, etc.)
+- `POST /agent/message` — Send a message to the agent with a `session_id`.
+- Persistent memory for each session.
+- Retrieves top 3 relevant context chunks from a local vector store (markdown/text files).
+- Supports plugin execution for:
+    - Math expressions (`2 + 5 * 3`)
+    - Weather search (`weather in Mumbai`)
+- Uses Groq’s `LLaMA 3 70B` for inference.
 
 ---
 
-## Stack
-
-| Layer         | Tech                       |
-|---------------|----------------------------|
-| Language      | TypeScript (Node.js)       |
-| Backend       | Express                    |
-| Embeddings    | Groq (LLaMA-style)        |
-| Vector Store  | Custom in-memory + cosine  |
-| Deployment    | GCP (Backend), Vercel (Frontend) |
-| LLM API       | [Groq](https://groq.com/)  |
-| Plugins       | Custom JS-based plugins    |
-
----
-
-## API: `/agent/message`
-
-```http
-POST /agent/message
-Content-Type: application/json
-
-{
-    "message": "What's the weather in Tokyo today?",
-    "session_id": "session-123"
-}
-```
-
-### Response
-
-```json
-{
-    "reply": "The weather in Tokyo today is 28°C with light showers.",
-    "session_id": "session-123"
-}
-```
-
----
-
-## File Structure
+## Setup Locally
 
 ```bash
-openagent-ts/
-├── frontend/        ← (Vercel frontend later)
-├── backend/         ← (All backend logic here)
-│   ├── src/
-│   │   ├── agent/
-│   │   ├── plugins/
-│   │   ├── memory/
-│   │   ├── rag/
-│   │   ├── utils/
-│   │   └── index.ts
-│   ├── data/        ← Markdown files for RAG
-│   ├── .env
-│   ├── tsconfig.json
-│   ├── package.json
-│   └── README.md
-└── NOTES.md
+git clone https://github.com/kashewknutt/openagent-ts.git
+cd openagent-ts/backend # Create your .env here in this backend folder.
+
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
 ```
 
----
+### Deployment
 
-## Deployment
+Hosted on Google Cloud Run  
+Live URL:  
+`https://openagent-ts-backend-<your-region>.a.run.app/agent/message`
 
-### Backend (GCP)
+### Test via cURL
 
-Set up environment variables:
+```bash
+curl -X POST https://<your-deployed-url>/agent/message \
+    -H "Content-Type: application/json" \
+    -d '{
+        "session_id": "test123",
+        "message": "What is 12 * 8 + 1?"
+}'
+```
+
+### Project Structure
+
+```plaintext
+backend/
+├── src/
+│   ├── agent/             # Core agent logic
+│   ├── plugins/           # Plugin system (math + weather)
+│   ├── rag/               # Embedding + vector search logic
+│   ├── store/             # In-memory session store
+│   └── index.ts           # Express entry point
+├── .env
+├── package.json
+└── README.md
+```
+
+### RAG Details
+
+- Local markdown/text files stored in `/data/`
+- Chunked and embedded on startup
+- Vector search uses cosine similarity
+- Top 3 matches are injected into prompt
+
+### Plugin System
+
+#### Math Plugin
+
+Evaluates basic math expressions.
+
+#### Weather Plugin
+
+Mocks or fetches current weather using a sample API.
+
+### Environment Variables
 
 ```ini
-GROQ_API_KEY=your_key_here
+GROQ_API_KEY=<your-groq-key>
 ```
-
-### Frontend (Vercel)
-
-Coming soon: Simple UI on Vercel (optional).
-
----
-
-## Setup Instructions
-
-```bash
-git clone https://github.com/kashewknutt/openagent-ts
-cd openagent-ts
-npm install  # or pnpm install
-```
-
-### Run Locally
-
-```bash
-npm dev
-```
-
-### Environment Variables (.env)
-
-```env
-GROQ_API_KEY=sk-...
-```
-
----
-
-## Notes
-
-- Uses Groq for LLM calls (supports GPT-4, Claude, Mixtral, etc.).
-- All plugin triggers are interpreted from plain text intents (not OpenAI tools).
-- You can expand the `data/` folder with your own `.md` or `.txt` files for more RAG power.
-- Cosine similarity is computed manually — no external vector DB needed.
-
----
-
-## TODO (Post Challenge)
-
-- Add UI client.
-- Add more plugins (Search, News, Translate, etc.).
-- Memory persistence (Redis or DB).
-- Add streaming support.
-
----
-
-## License
-
-MIT — Open source forever.
-
----
-
-## Author
-
-Built with focus, coffee, and good vibes by [Your Name].
