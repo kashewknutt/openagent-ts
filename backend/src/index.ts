@@ -4,12 +4,14 @@ import express from "express";
 import { handleMessage } from "./agent/handler";
 import { loadAndEmbedDocs } from "./rag/init";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config({ path: "./.env" });
 
 const app = express();
 const PORT =  8080;
 
+app.use(cors());
 app.use(express.json());
 
 app.post("/agent/message", handleMessage);
