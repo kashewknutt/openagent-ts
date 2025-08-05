@@ -7,13 +7,22 @@ export async function callLLM(
   key: string,
   memory: { role: string; content: string }[],
   contextChunks: string[] = []
-) {
+): Promise<string | { plugin: string; input: string }> {
   const context = contextChunks.length
     ? `You may use the following context to help you answer:\n\n${contextChunks.map((c, i) => `(${i + 1}) ${c}`).join("\n\n")}`
     : "No additional context provided.";
 
   const systemPrompt = `
 You are an AI assistant. Respond concisely and helpfully.
+
+If the user's query is a math expression (like "calculate 3*4+2") or a weather question (like "what's the weather in Tokyo?"), respond strictly in the following JSON format:
+
+{
+  "plugin": "math", // or "weather"
+  "input": "user input string or parsed location"
+}
+
+Otherwise, give a helpful natural language answer based on the context below.
 
 ${context}
 `.trim();
@@ -41,12 +50,26 @@ ${context}
       }
     );
 
-    const reply =
-      response.data?.choices?.[0]?.message?.content?.trim() ||
-      "No reply from model.";
+    const raw = response.data?.choices?.[0]?.message?.content?.trim() || "";
+    console.log("Groq response:", raw.slice(0, 200));
 
-    console.log("Groq response:", reply.slice(0, 200));
-    return reply;
+    // Try to parse JSON if it looks like a plugin call
+    if (raw.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (
+          parsed.plugin &&
+          typeof parsed.plugin === "string" &&
+          typeof parsed.input === "string"
+        ) {
+          return parsed;
+        }
+      } catch (err) {
+        // fallback to text
+      }
+    }
+
+    return raw;
   } catch (err) {
     console.error("Groq Error:", err);
     return "Could not get a response from the LLM.";
