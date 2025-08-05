@@ -1,4 +1,4 @@
-// backend/rag/embed.ts
+// backend/src/rag/embed.ts
 import { pipeline } from "@xenova/transformers";
 
 // Load once at top-level

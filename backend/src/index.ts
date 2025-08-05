@@ -1,3 +1,5 @@
+// backend/src/index.ts
+
 import express from "express";
 import { handleMessage } from "./agent/handler";
 import { loadAndEmbedDocs } from "./rag/init";

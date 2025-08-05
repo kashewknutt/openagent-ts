@@ -1,3 +1,5 @@
+// backend/src/agent/handler.ts
+
 import { Request, Response } from "express";
 import { callLLM }from "./llm";
 import { storeMessage, getSessionHistory } from "../memory/store";
@@ -25,9 +27,14 @@ export async function handleMessage(req: Request, res: Response) {
   const queryEmbedding = await getEmbedding(message);
   const contextChunks = queryRelevantChunks(queryEmbedding, 3);
 
-  const result = await callLLM(key, history, contextChunks);
+  const result = await callLLM(
+    key,
+    history,
+    contextChunks.map(c => ({ content: c.text, source: c.source }))
+  );
 
-  if (typeof result === "object" && result.plugin) {
+
+  if (result.type === "plugin") {
     let pluginReply = "";
 
     if (result.plugin === "math") {
@@ -42,7 +49,15 @@ export async function handleMessage(req: Request, res: Response) {
     return res.json({ reply: pluginReply, session_id });
   }
 
-  storeMessage(session_id, { role: "assistant", content: normalizeLLMReply(result) });
-  return res.json({ reply: result, session_id });
+  storeMessage(session_id, { role: "assistant", content: result.content });
+  return res.json({
+    reply: result.content,
+    session_id,
+    sources: contextChunks.map((c, i) => ({
+      index: i + 1,
+      source: c.source
+    }))
+  });
+
 
 }

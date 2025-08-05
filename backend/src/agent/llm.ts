@@ -1,16 +1,24 @@
+// backend/src/agent/llm.ts
+
 import axios from "axios";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL_NAME = "llama3-70b-8192";
 
+export type LLMResult =
+  | { type: "plugin"; plugin: string; input: string }
+  | { type: "text"; content: string }
+  | { type: "error"; content: string };
+
 export async function callLLM(
   key: string,
   memory: { role: string; content: string }[],
-  contextChunks: string[] = []
-): Promise<string | { plugin: string; input: string }> {
+  contextChunks: { content: string; source: string }[] = []
+): Promise<LLMResult> {
+
   const context = contextChunks.length
-    ? `You may use the following context to help you answer:\n\n${contextChunks.map((c, i) => `(${i + 1}) ${c}`).join("\n\n")}`
-    : "No additional context provided.";
+  ? `You may use the following context to help you answer:\n\n${contextChunks.map((c, i) => `(${i + 1}) [${c.source}]: ${c.content}`).join("\n\n")}`
+  : "No additional context provided.";
 
   const systemPrompt = `
 You are an AI assistant. Respond concisely and helpfully.
@@ -62,16 +70,16 @@ ${context}
           typeof parsed.plugin === "string" &&
           typeof parsed.input === "string"
         ) {
-          return parsed;
+          return { type: "plugin", plugin: parsed.plugin, input: parsed.input };
         }
       } catch (err) {
         // fallback to text
       }
     }
 
-    return raw;
+    return { type: "text", content: raw };
   } catch (err) {
     console.error("Groq Error:", err);
-    return "Could not get a response from the LLM.";
+    return { type: "error", content: "Could not get a response from the LLM." };
   }
 }

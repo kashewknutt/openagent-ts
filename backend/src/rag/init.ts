@@ -1,4 +1,4 @@
-// backend/rag/init.ts
+// backend/src/rag/init.ts
 import fs from "fs";
 import path from "path";
 import { chunkText } from "./chunk";
@@ -17,10 +17,11 @@ export async function loadAndEmbedDocs(apiKey: string) {
     for (const chunk of chunks) {
       const embedding = await getEmbedding(chunk);
       if (embedding.length) {
-        addToStore(chunk, embedding);
+        addToStore(chunk, embedding, file);
       }
     }
   }
+
 
   console.log("Docs loaded and embedded.");
 }

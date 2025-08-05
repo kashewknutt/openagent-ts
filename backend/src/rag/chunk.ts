@@ -1,4 +1,4 @@
-// backend/rag/chunk.ts
+// backend/src/rag/chunk.ts
 export function chunkText(text: string, maxWords = 200): string[] {
   const words = text.split(/\s+/);
   const chunks: string[] = [];
