@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon --watch src --exec ts-node src/index.ts",
-    "start": "node dist/index.js",
-    "build": "tsc"
+    "start": "ts-node src/index.ts",
+    "build": "echo 'No build step required for this project'"
   },
   "repository": {
     "type": "git",
