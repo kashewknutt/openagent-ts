@@ -50,7 +50,7 @@ export default function LandingBanner({ onSend }: LandingBannerProps) {
               <input
                 type="text"
                 placeholder="Type your message to start chatting..."
-                className="w-full px-4 py-3 pr-12 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors text-sm"
+                className="w-full px-4 py-3 pr-12 border border-slate-200 placeholder-gray-400 text-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && e.currentTarget.value.trim()) {
                     onSend(e.currentTarget.value);
